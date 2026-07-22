@@ -54,7 +54,8 @@ Prahari AI is a single-page, case-file web experience that:
 ## Tech Stack
 
 - **Frontend**: HTML, CSS, JavaScript
-- **Architecture**: Single-file web app (no backend required)
+- **Architecture**: Single-file web app (no backend required)<img width="1527" height="537" alt="image" src="https://github.com/user-attachments/assets/609a7500-dede-4d73-9ecb-090195c39e4e" />
+
 - **Runtime**: Browser-based, can run fully offline
 
 ## Run Locally
