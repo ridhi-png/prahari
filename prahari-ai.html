@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Prahari AI — Digital Case File</title>
+<style>
+  :root{
+    --paper: #EDE4D3;
+    --paper-2: #E3D8C2;
+    --paper-dark: #D8CBAE;
+    --ink: #2B241A;
+    --ink-soft: #6B5F4C;
+    --redink: #A3271F;
+    --redink-bright: #C7392F;
+    --greenink: #2E5E3E;
+    --amberink: #8A5A12;
+    --line: #B8A788;
+    --console: #1B1712;
+    --console-2: #241E16;
+    --mono: 'Courier New', 'IBM Plex Mono', monospace;
+    --stencil: 'Arial Narrow', 'Oswald', sans-serif;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; background: var(--paper);
+    background-image:
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.015) 0px, rgba(0,0,0,0.015) 1px, transparent 1px, transparent 3px),
+      radial-gradient(circle at 10% 5%, rgba(163,39,31,0.04), transparent 35%),
+      radial-gradient(circle at 95% 90%, rgba(43,36,26,0.05), transparent 40%);
+    color: var(--ink); font-family: 'Georgia', serif;
+  }
+  h1,h2,h3,.stencil{ font-family: var(--stencil); text-transform:uppercase; }
+  .mono{ font-family: var(--mono); }
+
+  /* ---------- Folder tab header ---------- */
+  .filebar{
+    background: var(--console); color:#D9CFA9; padding: 14px 26px;
+    display:flex; align-items:center; justify-content:space-between;
+    border-bottom: 4px solid var(--redink);
+  }
+  .filebar .left{ display:flex; align-items:center; gap:14px; }
+  .seal{ width:38px; height:38px; border-radius:50%; border:2px solid #D9CFA9; position:relative;
+    display:flex; align-items:center; justify-content:center; font-size:16px; }
+  .seal::after{ content:'👁'; filter: grayscale(1) brightness(1.6); }
+  .filebar-title{ font-family: var(--stencil); font-size:19px; letter-spacing:1.5px; }
+  .filebar-sub{ font-family: var(--mono); font-size:10.5px; color:#9C927A; letter-spacing:1px; }
+  .case-no{ font-family: var(--mono); font-size:12px; color:#D9CFA9; text-align:right; }
+  .case-no .n{ color:var(--redink-bright); font-weight:bold; }
+
+  .statstrip{
+    background: var(--console-2); color:#B7AD90; padding:8px 26px; display:flex; gap:34px;
+    font-family: var(--mono); font-size:11.5px; border-bottom:1px solid #3a3226; overflow-x:auto;
+  }
+  .statstrip b{ color:#EADFC0; }
+
+  .wrap{ max-width:1300px; margin:0 auto; padding: 26px 26px 60px; }
+
+  /* ---------- Paper card / exhibit ---------- */
+  .exhibit{
+    background: var(--paper-2); border:1px solid var(--line); border-radius:2px;
+    box-shadow: 0 2px 0 var(--paper-dark), 0 8px 18px rgba(43,36,26,0.15);
+    padding: 22px 24px; position:relative; margin-bottom:24px;
+  }
+  .exhibit::before{
+    content: attr(data-tab); position:absolute; top:-13px; left:22px;
+    background: var(--ink); color:var(--paper); font-family:var(--stencil); font-size:11px;
+    padding:4px 12px; letter-spacing:1.5px; clip-path: polygon(6% 0,94% 0,100% 100%,0% 100%);
+  }
+  .exhibit h2{ margin:6px 0 4px; font-size:16px; letter-spacing:0.8px; color:var(--ink); border-bottom:1px dashed var(--line); padding-bottom:8px; }
+  .exhibit .desc{ font-size:12.5px; color:var(--ink-soft); margin-bottom:14px; font-family:var(--mono); }
+
+  .grid2{ display:grid; grid-template-columns: 1.5fr 1fr; gap:20px; align-items:start; }
+  @media (max-width:980px){ .grid2{ grid-template-columns:1fr; } }
+
+  /* ---------- Scenario tabs ---------- */
+  .filetabs{ display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap; }
+  .filetab{
+    font-family:var(--mono); font-size:11.5px; background: var(--paper);
+    border:1px solid var(--line); border-bottom:none; padding:7px 12px; cursor:pointer; color:var(--ink-soft);
+  }
+  .filetab.active{ background: var(--console); color:#D9CFA9; border-color:var(--console); }
+
+  textarea#transcript{
+    width:100%; min-height:150px; background: var(--paper); border:1px solid var(--line);
+    color: var(--ink); font-family: var(--mono); font-size:13px; line-height:1.7; padding:14px; resize:vertical;
+  }
+  .transcript-view{
+    width:100%; min-height:150px; background: var(--paper); border:1px solid var(--line);
+    padding:14px; font-family: var(--mono); font-size:13px; line-height:1.9; white-space:pre-wrap; display:none;
+  }
+  .transcript-view.show{ display:block; }
+  mark.hl{ background: rgba(163,39,31,0.18); border-bottom:2px solid var(--redink); padding:0 2px; }
+
+  .stamp-btn{
+    background: var(--redink); color:#F4E8D9; border:2px solid var(--redink-bright); border-radius:4px;
+    padding:12px 22px; font-family:var(--stencil); font-size:13px; letter-spacing:1.5px; cursor:pointer;
+    transform: rotate(-1.5deg); transition: transform .15s ease;
+  }
+  .stamp-btn:hover{ transform: rotate(-1.5deg) scale(1.04); }
+  .stamp-btn:active{ transform: rotate(-1.5deg) scale(0.97); }
+  .ghost-btn{ background:none; border:1px solid var(--line); color:var(--ink-soft); padding:11px 16px;
+    font-family:var(--mono); font-size:11.5px; cursor:pointer; }
+  .actions-row{ display:flex; gap:10px; align-items:center; margin:14px 0; }
+  .status{ font-family:var(--mono); font-size:11px; color:var(--ink-soft); }
+
+  /* Verdict stamp */
+  .verdict-stamp{
+    margin-top:16px; text-align:center; padding:18px; border:4px double transparent;
+    display:none; transform: scale(0.6) rotate(-8deg); opacity:0;
+  }
+  .verdict-stamp.show{ display:block; animation: stampIn .4s cubic-bezier(.2,1.4,.4,1) forwards; }
+  @keyframes stampIn{ to{ transform: scale(1) rotate(-4deg); opacity:1; } }
+  .verdict-stamp .big{ font-family: var(--stencil); font-size:26px; letter-spacing:2px; border:5px solid; display:inline-block; padding:8px 22px; border-radius:6px; }
+  .verdict-stamp .sub{ font-family: var(--mono); font-size:11.5px; margin-top:8px; color:var(--ink-soft); }
+  .danger-stamp .big{ color:var(--redink); border-color:var(--redink); }
+  .warn-stamp .big{ color:var(--amberink); border-color:var(--amberink); }
+  .safe-stamp .big{ color:var(--greenink); border-color:var(--greenink); }
+
+  /* ---------- Tribunal agents ---------- */
+  .agent-card{
+    background: var(--paper); border:1px solid var(--line); padding:12px 14px; margin-bottom:10px; position:relative;
+  }
+  .agent-name{ font-family:var(--stencil); font-size:12px; letter-spacing:0.6px; display:flex; justify-content:space-between; align-items:center; }
+  .agent-role{ font-family:var(--mono); font-size:10px; color:var(--ink-soft); }
+  .gauge-track{ height:6px; background: var(--paper-dark); border-radius:4px; overflow:hidden; margin:8px 0 6px; }
+  .gauge-fill{ height:100%; width:0%; border-radius:4px; transition: width 1s ease; }
+  .agent-text{ font-family: var(--mono); font-size:11.5px; color:var(--ink); min-height:16px; }
+  .agent-text.typing::after{ content:'▌'; animation: blink 1s step-start infinite; }
+  @keyframes blink{ 50%{ opacity:0; } }
+
+  /* ---------- Corkboard ---------- */
+  .corkboard{
+    background: #C9AE7F; background-image: radial-gradient(rgba(0,0,0,0.06) 1px, transparent 1px);
+    background-size: 8px 8px; border:1px solid var(--line); padding:20px; position:relative; min-height:260px;
+  }
+  .pin-card{
+    position:absolute; background:#FBF6EA; border:1px solid #00000022; padding:8px 10px; width:118px;
+    box-shadow: 2px 3px 6px rgba(0,0,0,0.25); font-family: var(--mono); font-size:9.5px; color:var(--ink);
+    text-align:center;
+  }
+  .pin-card::before{ content:''; position:absolute; top:-6px; left:50%; transform:translateX(-50%);
+    width:10px; height:10px; border-radius:50%; background: var(--redink-bright); box-shadow:0 1px 2px rgba(0,0,0,0.4); }
+  .pin-card .role{ font-weight:bold; margin-bottom:2px; }
+  #corkSvg{ position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
+  .string{ stroke:#8E1B14; stroke-width:1.6; fill:none; opacity:0.75; stroke-dasharray:3 0; filter: drop-shadow(0 1px 0 rgba(0,0,0,0.2)); }
+
+  /* ---------- Tally bars (hotspot) ---------- */
+  .tally-row{ display:flex; align-items:center; gap:10px; margin-bottom:9px; font-family:var(--mono); font-size:12px; }
+  .tally-city{ width:96px; color:var(--ink-soft); flex:none; }
+  .tally-bar{ letter-spacing:-1px; color:var(--redink); flex:1; overflow:hidden; white-space:nowrap; }
+  .tally-val{ width:56px; text-align:right; color:var(--ink); }
+
+  /* ---------- Currency exhibit ---------- */
+  .note-wrap{ display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap; }
+  .note-svg-box{ position:relative; flex:none; }
+  .feature-tag{
+    position:absolute; font-family:var(--mono); font-size:9.5px; background:var(--paper); border:1px solid var(--line);
+    padding:2px 6px; opacity:0; transition: opacity .4s ease; white-space:nowrap;
+  }
+  .feature-tag.show{ opacity:1; }
+  .feature-tag.pass{ color:var(--greenink); border-color:var(--greenink); }
+  .feature-tag.fail{ color:var(--redink); border-color:var(--redink); }
+  .note-controls{ flex:1; min-width:220px; }
+  .note-list{ font-family:var(--mono); font-size:11.5px; color:var(--ink-soft); }
+  .note-list li{ margin-bottom:6px; }
+
+  footer{ text-align:center; color:var(--ink-soft); font-family:var(--mono); font-size:11px; padding:20px 0; }
+</style>
+</head>
+<body>
+
+<div class="filebar">
+  <div class="left">
+    <div class="seal"></div>
+    <div>
+      <div class="filebar-title">Prahari AI</div>
+      <div class="filebar-sub">Digital Public Safety — Case Intelligence Dossier</div>
+    </div>
+  </div>
+  <div class="case-no">FILE REF: <span class="n">PR/CYB/2026/00847</span><br>STATUS: <span class="n">ACTIVE MONITORING</span></div>
+</div>
+<div class="statstrip">
+  <span>CALLS TRIAGED TODAY: <b id="t-scanned">0</b></span>
+  <span>SCAMS INTERCEPTED: <b id="t-blocked">0</b></span>
+  <span>AMOUNT PROTECTED: <b id="t-saved">₹0 Cr</b></span>
+  <span>AGENTS ON DUTY: <b>04</b></span>
+</div>
+
+<div class="wrap">
+
+  <div class="exhibit" data-tab="EXHIBIT 1 · CALL TRANSCRIPT">
+    <h2>Suspect Communication — Transcript for Review</h2>
+    <div class="desc">Select a filed complaint or paste a fresh transcript. The tribunal below will independently examine it.</div>
+
+    <div class="filetabs">
+      <div class="filetab active" data-scn="arrest">Complaint #1 — "Digital Arrest"</div>
+      <div class="filetab" data-scn="courier">Complaint #2 — Courier Scam</div>
+      <div class="filetab" data-scn="bank">Complaint #3 — Bank Call (control)</div>
+      <div class="filetab" data-scn="custom">Blank Docket — Paste Your Own</div>
+    </div>
+
+    <textarea id="transcript" spellcheck="false"></textarea>
+    <div class="transcript-view" id="transcriptView"></div>
+
+    <div class="actions-row">
+      <button class="stamp-btn" id="analyzeBtn">SUBMIT FOR TRIBUNAL REVIEW</button>
+      <button class="ghost-btn" id="resetBtn">Clear Docket</button>
+      <span class="status" id="statusPill">awaiting docket…</span>
+    </div>
+
+    <div class="verdict-stamp" id="verdict">
+      <div class="big" id="verdictBig">—</div>
+      <div class="sub" id="verdictSub">—</div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="exhibit" data-tab="TRIBUNAL · 4 INDEPENDENT AGENTS">
+      <h2>Multi-Agent Tribunal</h2>
+      <div class="desc">Four specialised agents examine the same transcript independently, then a verdict is reconciled.</div>
+
+      <div class="agent-card">
+        <div class="agent-name">Agent 01 — Legal-Claim Verifier <span class="agent-role" id="a1-conf">0%</span></div>
+        <div class="gauge-track"><div class="gauge-fill" id="a1-fill" style="background:var(--redink)"></div></div>
+        <div class="agent-text" id="a1-text">Standing by…</div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-name">Agent 02 — Coercion &amp; Pressure Analyst <span class="agent-role" id="a2-conf">0%</span></div>
+        <div class="gauge-track"><div class="gauge-fill" id="a2-fill" style="background:var(--amberink)"></div></div>
+        <div class="agent-text" id="a2-text">Standing by…</div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-name">Agent 03 — Financial Intent Agent <span class="agent-role" id="a3-conf">0%</span></div>
+        <div class="gauge-track"><div class="gauge-fill" id="a3-fill" style="background:var(--redink)"></div></div>
+        <div class="agent-text" id="a3-text">Standing by…</div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-name">Agent 04 — Network Correlation Agent <span class="agent-role" id="a4-conf">0%</span></div>
+        <div class="gauge-track"><div class="gauge-fill" id="a4-fill" style="background:var(--greenink)"></div></div>
+        <div class="agent-text" id="a4-text">Standing by…</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="exhibit" data-tab="EXHIBIT 2 · SUSPECT NETWORK">
+        <h2>Corkboard — Linked Case Map</h2>
+        <div class="desc">Confirmed cases pin new nodes below and pull the red string.</div>
+        <div class="corkboard" id="corkboard">
+          <svg id="corkSvg"></svg>
+        </div>
+      </div>
+
+      <div class="exhibit" data-tab="EXHIBIT 3 · FIELD REPORT">
+        <h2>Complaint Density by City</h2>
+        <div id="cityBars"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="exhibit" data-tab="EXHIBIT 4 · CURRENCY VERIFICATION">
+    <h2>Counterfeit Note Screening</h2>
+    <div class="desc">Simulated field scan of a submitted note against standard RBI security-feature categories (illustrative note graphic, not an actual banknote reproduction).</div>
+    <div class="note-wrap">
+      <div class="note-svg-box" id="noteBox">
+        <svg width="300" height="150" viewBox="0 0 300 150" style="border:1px solid var(--line); background:#DDD3B8;">
+          <rect x="4" y="4" width="292" height="142" fill="none" stroke="#8a7a55" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <circle cx="230" cy="75" r="34" fill="none" stroke="#8a7a55" stroke-width="1.5"/>
+          <text x="230" y="80" text-anchor="middle" font-family="Georgia" font-size="11" fill="#5c4f38">PORTRAIT</text>
+          <line x1="120" y1="10" x2="120" y2="140" stroke="#8a7a55" stroke-width="1" stroke-dasharray="2 2"/>
+          <text x="30" y="30" font-family="Georgia" font-size="10" fill="#5c4f38">DEMO NOTE</text>
+          <text x="30" y="120" font-family="Georgia" font-size="18" fill="#5c4f38" font-weight="bold">500</text>
+          <text x="150" y="20" font-family="monospace" font-size="7" fill="#8a7a55">micro-lettering band ~~~~~~~~~~~~~~~~</text>
+        </svg>
+        <div class="feature-tag" id="ft1" style="top:2px; left:145px;">Security thread — checking…</div>
+        <div class="feature-tag" id="ft2" style="top:38px; right:-20px;">Watermark portrait — checking…</div>
+        <div class="feature-tag" id="ft3" style="bottom:6px; left:20px;">Denomination micro-print — checking…</div>
+        <div class="feature-tag" id="ft4" style="top:66px; left:6px;">Latent image — checking…</div>
+      </div>
+      <div class="note-controls">
+        <button class="stamp-btn" id="scanNoteBtn">SCAN SUBMITTED NOTE</button>
+        <ul class="note-list" style="margin-top:14px;">
+          <li>✓ / ✗ against 4 standard security-feature categories</li>
+          <li>Field officer or bank teller gets instant pass/fail, not raw pixels</li>
+          <li>Failed scans auto-log to the same case file as linked evidence</li>
+        </ul>
+        <div class="verdict-stamp" id="noteVerdict">
+          <div class="big" id="noteVerdictBig">—</div>
+          <div class="sub" id="noteVerdictSub">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Prahari AI Prototype · Case-file simulation for demo purposes · ET AI Hackathon 2026 · Digital Public Safety Track</footer>
+</div>
+
+<script>
+/* ================= Transcript samples ================= */
+const SAMPLES = {
+  arrest: `Officer: This is Inspector Sharma calling from CBI Cyber Cell, Delhi.
+Officer: Your Aadhaar number has been linked to a parcel containing drugs and fake passports intercepted at Mumbai customs.
+Officer: A non-bailable arrest warrant has been issued in your name under Section 420.
+Officer: Do not disconnect this video call under any circumstances, this is now a digital arrest.
+Officer: To verify you are not part of this money laundering racket, you must transfer your savings to the RBI verification account immediately.
+Officer: Share the OTP sent to your phone right now so we can confirm your identity before we file the case.
+Officer: If you tell anyone about this call, including your family, you will be arrested within 30 minutes.`,
+  courier: `Caller: Sir this is FedEx courier division, a parcel booked under your name contains illegal substances.
+Caller: This has been forwarded to Customs and Narcotics Control Bureau.
+Caller: We are transferring your call to a senior police officer, please stay on the video call.
+Caller: To clear your name you need to verify your bank account and share the OTP for identity confirmation.
+Caller: If you disconnect, a warrant team will be sent to your address immediately.`,
+  bank: `Agent: Good afternoon, this is Priya calling from HDFC Bank customer service regarding your recent card application.
+Agent: I wanted to confirm you received the welcome kit and check if you have any questions about your credit limit.
+Agent: You can visit your nearest branch anytime for physical KYC, and we never ask for your OTP or PIN over the phone.
+Agent: Is there anything else I can help you with today?`,
+  custom: ``
+};
+
+/* ================= Pattern bank tagged by agent ================= */
+const PATTERNS = [
+  { re: /\b(cbi|ed\b|enforcement directorate|narcotics|customs|cyber cell)\b/gi, w: 15, agent:1, tag:"Law-enforcement impersonation" },
+  { re: /\b(arrest warrant|non-?bailable|warrant (has been|team))\b/gi, w: 20, agent:1, tag:"False legal threat" },
+  { re: /\b(aadhaar|passport).{0,40}(linked|drugs|parcel|crime)\b/gi, w: 12, agent:1, tag:"Identity-fear manipulation" },
+
+  { re: /\b(digital arrest|do not disconnect|don't disconnect|stay on (this|the) (video )?call)\b/gi, w: 25, agent:2, tag:"Isolation / digital-arrest tactic" },
+  { re: /\b(don't tell|do not tell|not (to )?inform).{0,20}(family|anyone)\b/gi, w: 15, agent:2, tag:"Secrecy coercion" },
+  { re: /\bwithin (\d+ )?(minutes|hours)\b|\bimmediately\b/gi, w: 8, agent:2, tag:"Urgency pressure" },
+
+  { re: /\b(transfer|deposit).{0,30}(rbi|verification|safe|secure) account\b/gi, w: 25, agent:3, tag:"Fraudulent transfer request" },
+  { re: /\bshare (the )?otp\b|\botp for (identity|verification)\b/gi, w: 20, agent:3, tag:"OTP solicitation" },
+  { re: /\bwe never ask for your (otp|pin)\b/gi, w: -20, agent:3, tag:"Legitimate disclosure" },
+];
+
+function runTribunal(text){
+  const totals = {1:0, 2:0, 3:0, 4:0};
+  const tagsByAgent = {1:[], 2:[], 3:[], 4:[]};
+  let allMatches = [];
+  PATTERNS.forEach(p=>{
+    const found = text.match(p.re);
+    if(found){
+      const mult = p.w < 0 ? 1 : Math.min(found.length,2);
+      totals[p.agent] += p.w * mult;
+      tagsByAgent[p.agent].push(p.tag);
+      allMatches.push(p);
+    }
+  });
+  Object.keys(totals).forEach(k=> totals[k] = Math.max(0, Math.min(100, Math.round(totals[k]*1.6))) );
+  const overall = Math.max(0, Math.min(100, Math.round((totals[1]*0.35 + totals[2]*0.35 + totals[3]*0.30))));
+  totals[4] = overall >= 61 ? Math.min(100, 55 + Math.round(overall/3)) : (overall>=31? 30: 5);
+  return { totals, tagsByAgent, overall, allMatches };
+}
+
+function highlight(text, matches){
+  let html = text.replace(/</g,"&lt;");
+  matches.forEach(m=>{
+    if(m.w>0) html = html.replace(m.re, (match)=>`<mark class="hl">${match}</mark>`);
+  });
+  return html;
+}
+
+/* ================= DOM wiring ================= */
+const transcriptArea = document.getElementById('transcript');
+const transcriptView = document.getElementById('transcriptView');
+transcriptArea.value = SAMPLES.arrest;
+
+document.querySelectorAll('.filetab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.filetab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    const scn = tab.dataset.scn;
+    transcriptArea.value = SAMPLES[scn];
+    transcriptArea.style.display='block';
+    transcriptView.classList.remove('show');
+    resetPanel();
+    if(scn==='custom'){ transcriptArea.value=''; transcriptArea.placeholder='Paste a transcript to submit to the tribunal…'; transcriptArea.focus(); }
+  });
+});
+
+function agentText(id, text, typing=true){
+  const el = document.getElementById(id);
+  el.textContent = text;
+  if(typing){ el.classList.add('typing'); setTimeout(()=>el.classList.remove('typing'), 900); }
+}
+
+function resetPanel(){
+  document.getElementById('verdict').classList.remove('show');
+  document.getElementById('statusPill').textContent='awaiting docket…';
+  [1,2,3,4].forEach(n=>{
+    document.getElementById('a'+n+'-fill').style.width='0%';
+    document.getElementById('a'+n+'-conf').textContent='0%';
+    document.getElementById('a'+n+'-text').textContent='Standing by…';
+  });
+  resetCork();
+}
+
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  transcriptArea.style.display='block';
+  transcriptView.classList.remove('show');
+  resetPanel();
+});
+
+document.getElementById('analyzeBtn').addEventListener('click', ()=>{
+  const text = transcriptArea.value.trim();
+  const statusPill = document.getElementById('statusPill');
+  if(!text){ statusPill.textContent='docket is empty.'; return; }
+  statusPill.textContent='tribunal reviewing…';
+  transcriptArea.style.display='none';
+  transcriptView.classList.add('show');
+  transcriptView.innerHTML = text.replace(/</g,"&lt;").replace(/\n/g,"<br>");
+
+  setTimeout(()=>{
+    const { totals, tagsByAgent, overall, allMatches } = runTribunal(text);
+    transcriptView.innerHTML = highlight(text, allMatches).replace(/\n/g,"<br>");
+
+    const agentMeta = {
+      1:{name:'Legal-Claim Verifier', pos:'no impersonation or false legal claims found in transcript.'},
+      2:{name:'Coercion Analyst', pos:'no isolation or secrecy pressure detected.'},
+      3:{name:'Financial Intent Agent', pos:'no request for funds or OTP detected.'},
+      4:{name:'Network Correlation Agent', pos:'no linkage to prior flagged numbers.'}
+    };
+
+    [1,2,3,4].forEach((n,i)=>{
+      setTimeout(()=>{
+        const score = totals[n];
+        document.getElementById('a'+n+'-fill').style.width = score+'%';
+        document.getElementById('a'+n+'-conf').textContent = score+'%';
+        const tags = tagsByAgent[n];
+        let msg;
+        if(n===4){
+          msg = overall>=61 ? `Cross-referenced with ${5+Math.floor(Math.random()*20)} prior complaints — same script family detected.`
+               : overall>=31 ? `Partial signature match with ${Math.floor(Math.random()*4)} prior reports — low confidence.`
+               : `No correlation found in case archive.`;
+        } else {
+          msg = tags.length ? `Flags: ${tags.join('; ')}.` : `Assessment: ${agentMeta[n].pos}`;
+        }
+        agentText('a'+n+'-text', msg);
+      }, i*450);
+    });
+
+    setTimeout(()=>{
+      const verdict = document.getElementById('verdict');
+      const big = document.getElementById('verdictBig');
+      const sub = document.getElementById('verdictSub');
+      verdict.classList.remove('danger-stamp','warn-stamp','safe-stamp');
+      if(overall>=61){
+        verdict.classList.add('danger-stamp');
+        big.textContent = 'SCAM CONFIRMED';
+        sub.textContent = 'Tribunal consensus: digital-arrest pattern. Auto-alert dispatched to telecom + cybercrime cell.';
+        pinNewCase(true);
+      } else if(overall>=31){
+        verdict.classList.add('warn-stamp');
+        big.textContent = 'FLAGGED FOR REVIEW';
+        sub.textContent = 'Mixed signals across agents. Routed to a human investigator, not auto-blocked.';
+        pinNewCase(false);
+      } else {
+        verdict.classList.add('safe-stamp');
+        big.textContent = 'CASE CLOSED — SAFE';
+        sub.textContent = 'No agent found sufficient evidence of fraud.';
+      }
+      verdict.classList.add('show');
+      statusPill.textContent='review complete.';
+    }, 4*450 + 200);
+  }, 900);
+});
+
+/* ================= Corkboard ================= */
+const corkSvg = document.getElementById('corkSvg');
+const corkboard = document.getElementById('corkboard');
+const baseCases = [
+  {id:'hub', x:70, y:110, role:'Call Centre', note:'Origin — Cluster #4471'},
+  {id:'m1', x:230, y:40, role:'Mule A/C', note:'Flagged 3x this month'},
+  {id:'m2', x:250, y:150, role:'Mule A/C', note:'Linked bank: XX-4432'},
+  {id:'v1', x:420, y:70, role:'Victim Rpt', note:'Filed via IVR'},
+  {id:'v2', x:440, y:170, role:'Victim Rpt', note:'Filed via app'},
+];
+let extraCount = 0;
+function pointOf(id){ return baseCases.find(c=>c.id===id) || {x:0,y:0}; }
+
+function drawCork(){
+  corkSvg.innerHTML='';
+  corkboard.querySelectorAll('.pin-card').forEach(e=>e.remove());
+  const links = [['hub','m1'],['hub','m2'],['m1','v1'],['m2','v2']];
+  links.forEach(([a,b])=>{
+    const pa = pointOf(a), pb = pointOf(b);
+    const midx = (pa.x+pb.x)/2, midy = (pa.y+pb.y)/2 + 18;
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d', `M${pa.x+30},${pa.y+16} Q${midx},${midy} ${pb.x+10},${pb.y+16}`);
+    path.setAttribute('class','string');
+    corkSvg.appendChild(path);
+  });
+  baseCases.forEach(c=>{
+    const div = document.createElement('div');
+    div.className='pin-card';
+    div.style.left = c.x+'px'; div.style.top = c.y+'px';
+    div.innerHTML = `<div class="role">${c.role}</div><div>${c.note}</div>`;
+    corkboard.appendChild(div);
+  });
+}
+function resetCork(){ drawCork(); }
+function pinNewCase(confirmed){
+  if(!confirmed) return;
+  extraCount++;
+  const nx = 320 + (extraCount%2? -40:60), ny = 210;
+  const id = 'new'+extraCount;
+  baseCases.push({id, x:nx, y:ny, role:'New Victim Rpt', note:'Just filed'});
+  drawCork();
+  // link the newest to hub
+  const pa = pointOf('hub'), pb = pointOf(id);
+  const midx=(pa.x+pb.x)/2, midy=(pa.y+pb.y)/2+18;
+  const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+  path.setAttribute('d', `M${pa.x+30},${pa.y+16} Q${midx},${midy} ${pb.x+10},${pb.y+16}`);
+  path.setAttribute('class','string');
+  path.style.opacity=0;
+  corkSvg.appendChild(path);
+  setTimeout(()=> path.style.transition='opacity .6s ease', 10);
+  setTimeout(()=> path.style.opacity=0.75, 50);
+}
+drawCork();
+
+/* ================= City tally (block-character bars) ================= */
+const cities = [
+  {name:'Delhi NCR', val:3820},
+  {name:'Mumbai', val:2910},
+  {name:'Bengaluru', val:2340},
+  {name:'Hyderabad', val:1870},
+  {name:'Lucknow', val:1420},
+  {name:'Ahmedabad', val:1105},
+];
+const maxVal = Math.max(...cities.map(c=>c.val));
+const cityBars = document.getElementById('cityBars');
+cities.forEach(c=>{
+  const blocks = Math.round((c.val/maxVal)*28);
+  const row = document.createElement('div'); row.className='tally-row';
+  row.innerHTML = `<div class="tally-city">${c.name}</div><div class="tally-bar" data-blocks="${blocks}"></div><div class="tally-val">${c.val.toLocaleString('en-IN')}</div>`;
+  cityBars.appendChild(row);
+});
+setTimeout(()=>{
+  document.querySelectorAll('.tally-bar').forEach(el=>{
+    const n = parseInt(el.dataset.blocks);
+    let i=0;
+    const iv = setInterval(()=>{
+      i++;
+      el.textContent = '█'.repeat(i) + '░'.repeat(Math.max(0,n-i));
+      if(i>=n) clearInterval(iv);
+    }, 30);
+  });
+}, 300);
+
+/* ================= Ticker ================= */
+function countUp(el, target, prefix='', suffix='', decimals=0){
+  let cur=0; const steps=40; const inc=target/steps;
+  const iv=setInterval(()=>{ cur+=inc; if(cur>=target){cur=target; clearInterval(iv);}
+    el.textContent = prefix + cur.toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + suffix; },30);
+}
+countUp(document.getElementById('t-scanned'), 142318,'','');
+countUp(document.getElementById('t-blocked'), 8214,'','');
+countUp(document.getElementById('t-saved'), 47.2,'₹',' Cr',1);
+
+/* ================= Currency exhibit ================= */
+document.getElementById('scanNoteBtn').addEventListener('click', ()=>{
+  const results = [
+    {id:'ft1', pass:true, label:'Security thread'},
+    {id:'ft2', pass:true, label:'Watermark portrait'},
+    {id:'ft3', pass:Math.random()>0.5, label:'Denomination micro-print'},
+    {id:'ft4', pass:true, label:'Latent image'},
+  ];
+  results.forEach((r,i)=>{
+    setTimeout(()=>{
+      const el = document.getElementById(r.id);
+      el.textContent = `${r.label} — ${r.pass? 'PASS':'ANOMALY DETECTED'}`;
+      el.classList.add('show', r.pass?'pass':'fail');
+    }, i*350);
+  });
+  setTimeout(()=>{
+    const allPass = results.every(r=>r.pass);
+    const v = document.getElementById('noteVerdict');
+    const big = document.getElementById('noteVerdictBig');
+    const sub = document.getElementById('noteVerdictSub');
+    v.classList.remove('danger-stamp','safe-stamp');
+    if(allPass){
+      v.classList.add('safe-stamp');
+      big.textContent='GENUINE';
+      sub.textContent='All 4 security-feature categories passed.';
+    } else {
+      v.classList.add('danger-stamp');
+      big.textContent='COUNTERFEIT SUSPECTED';
+      sub.textContent='Flagged feature logged to case file as physical evidence.';
+    }
+    v.classList.add('show');
+  }, results.length*350 + 200);
+});
+</script>
+</body>
+</html>

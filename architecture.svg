@@ -1,0 +1,120 @@
+<svg viewBox="0 0 1240 720" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Mono, Consolas, monospace">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#4FD1FF"/>
+    </marker>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0A0E14"/>
+      <stop offset="100%" stop-color="#0D121C"/>
+    </linearGradient>
+  </defs>
+  <rect width="1240" height="720" fill="url(#bg)"/>
+
+  <text x="40" y="46" fill="#E7ECF3" font-size="24" font-weight="700">SentinelGrid — System Architecture</text>
+  <text x="40" y="68" fill="#7C8AA0" font-size="13">AI-Powered Digital Public Safety Intelligence Platform</text>
+
+  <!-- Layer labels -->
+  <text x="40" y="115" fill="#4FD1FF" font-size="12" letter-spacing="1.5">01 · DATA SOURCES</text>
+  <text x="360" y="115" fill="#4FD1FF" font-size="12" letter-spacing="1.5">02 · INGESTION &amp; FUSION</text>
+  <text x="640" y="115" fill="#4FD1FF" font-size="12" letter-spacing="1.5">03 · INTELLIGENCE AGENTS</text>
+  <text x="960" y="115" fill="#4FD1FF" font-size="12" letter-spacing="1.5">04 · RESPONSE &amp; ACTION</text>
+
+  <!-- Column 1: Data sources -->
+  <g font-size="12.5" fill="#E7ECF3">
+    <rect x="30" y="135" width="220" height="44" rx="8" fill="#151C29" stroke="#232B3A"/>
+    <text x="45" y="162">📞 Call/Video Metadata (Telecom)</text>
+
+    <rect x="30" y="191" width="220" height="44" rx="8" fill="#151C29" stroke="#232B3A"/>
+    <text x="45" y="218">🏦 Bank Transaction Streams</text>
+
+    <rect x="30" y="247" width="220" height="44" rx="8" fill="#151C29" stroke="#232B3A"/>
+    <text x="45" y="274">🖼 Currency Image Capture (POS/ATM)</text>
+
+    <rect x="30" y="303" width="220" height="44" rx="8" fill="#151C29" stroke="#232B3A"/>
+    <text x="45" y="330">📱 Citizen Reports (App/IVR/WhatsApp)</text>
+
+    <rect x="30" y="359" width="220" height="44" rx="8" fill="#151C29" stroke="#232B3A"/>
+    <text x="45" y="386">🗺 NCRB / Police Complaint Data</text>
+  </g>
+
+  <!-- Column 2: Ingestion -->
+  <g font-size="12.5" fill="#E7ECF3">
+    <rect x="330" y="150" width="230" height="70" rx="8" fill="#151C29" stroke="#232B3A"/>
+    <text x="345" y="178">Speech-to-Text + NLP</text>
+    <text x="345" y="196" fill="#7C8AA0" font-size="11">Transcript &amp; call-flow parsing</text>
+
+    <rect x="330" y="234" width="230" height="70" rx="8" fill="#151C29" stroke="#232B3A"/>
+    <text x="345" y="262">Computer Vision Pipeline</text>
+    <text x="345" y="280" fill="#7C8AA0" font-size="11">Note microprint / security features</text>
+
+    <rect x="330" y="318" width="230" height="70" rx="8" fill="#151C29" stroke="#232B3A"/>
+    <text x="345" y="346">Entity &amp; Graph Builder</text>
+    <text x="345" y="364" fill="#7C8AA0" font-size="11">Accounts, devices, numbers → graph</text>
+  </g>
+
+  <!-- Column 3: Agents -->
+  <g font-size="12.5" fill="#E7ECF3">
+    <rect x="640" y="140" width="250" height="60" rx="8" fill="#1A1420" stroke="#3A2330"/>
+    <text x="655" y="164">Scam Pattern Classifier</text>
+    <text x="655" y="182" fill="#7C8AA0" font-size="11">Digital-arrest / impersonation scoring</text>
+
+    <rect x="640" y="212" width="250" height="60" rx="8" fill="#1A1420" stroke="#3A2330"/>
+    <text x="655" y="236">Counterfeit Detection Agent</text>
+    <text x="655" y="254" fill="#7C8AA0" font-size="11">Vision model, denomination-aware</text>
+
+    <rect x="640" y="284" width="250" height="60" rx="8" fill="#1A1420" stroke="#3A2330"/>
+    <text x="655" y="308">Fraud Network Graph Agent</text>
+    <text x="655" y="326" fill="#7C8AA0" font-size="11">Mule/victim clustering, ring mapping</text>
+
+    <rect x="640" y="356" width="250" height="60" rx="8" fill="#1A1420" stroke="#3A2330"/>
+    <text x="655" y="380">Geospatial Hotspot Engine</text>
+    <text x="655" y="398" fill="#7C8AA0" font-size="11">District-level crime pattern mapping</text>
+  </g>
+
+  <!-- Column 4: Response -->
+  <g font-size="12.5" fill="#E7ECF3">
+    <rect x="960" y="150" width="250" height="60" rx="8" fill="#141F1A" stroke="#22392F"/>
+    <text x="975" y="174">Telecom / Carrier Alert API</text>
+    <text x="975" y="192" fill="#7C8AA0" font-size="11">Block / flag active session</text>
+
+    <rect x="960" y="222" width="250" height="60" rx="8" fill="#141F1A" stroke="#22392F"/>
+    <text x="975" y="246">Cybercrime Command Dashboard</text>
+    <text x="975" y="264" fill="#7C8AA0" font-size="11">Evidence packages, patrol priority</text>
+
+    <rect x="960" y="294" width="250" height="60" rx="8" fill="#141F1A" stroke="#22392F"/>
+    <text x="975" y="318">Citizen Fraud Shield App</text>
+    <text x="975" y="336" fill="#7C8AA0" font-size="11">WhatsApp / IVR advisory, 12 languages</text>
+  </g>
+
+  <!-- Connector lines -->
+  <g stroke="#4FD1FF" stroke-width="1.4" fill="none" opacity="0.6" marker-end="url(#arrow)">
+    <path d="M250,157 C290,157 290,185 330,185"/>
+    <path d="M250,213 C290,213 290,269 330,269"/>
+    <path d="M250,269 C290,269 290,269 330,269"/>
+    <path d="M250,325 C300,325 300,353 330,353"/>
+    <path d="M250,381 C300,381 300,353 330,353"/>
+
+    <path d="M560,185 C600,185 600,170 640,170"/>
+    <path d="M560,269 C600,269 600,242 640,242"/>
+    <path d="M560,353 C600,353 600,314 640,314"/>
+    <path d="M560,353 C600,353 600,386 640,386"/>
+
+    <path d="M890,170 C925,170 925,180 960,180"/>
+    <path d="M890,242 C925,242 925,252 960,252"/>
+    <path d="M890,314 C925,314 925,324 960,324"/>
+    <path d="M890,386 C925,386 925,324 960,324"/>
+  </g>
+
+  <!-- Feedback loop -->
+  <g stroke="#FF4757" stroke-width="1.4" fill="none" opacity="0.55" stroke-dasharray="4 4" marker-end="url(#arrow)">
+    <path d="M1085,354 C1150,470 700,560 300,470 C150,440 100,300 150,180" marker-end="url(#arrow)"/>
+  </g>
+  <text x="420" y="545" fill="#FF4757" font-size="11.5">↺ Confirmed cases feed back into pattern classifier &amp; graph agent (continuous learning loop)</text>
+
+  <!-- Bottom: Knowledge / Compliance layer -->
+  <rect x="30" y="610" width="1180" height="70" rx="10" fill="#101822" stroke="#232B3A"/>
+  <text x="50" y="635" fill="#4FD1FF" font-size="12" letter-spacing="1.2">05 · SHARED KNOWLEDGE &amp; COMPLIANCE LAYER</text>
+  <text x="50" y="660" fill="#E7ECF3" font-size="12.5">RAG over MHA/RBI/NCRB advisories · Court-admissible evidence packaging · Full audit trail of every automated action · Regional language layer (12 languages)</text>
+
+  <text x="40" y="705" fill="#7C8AA0" font-size="11">SentinelGrid · ET AI Hackathon 2026 · Digital Public Safety Track</text>
+</svg>
