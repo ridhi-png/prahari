@@ -3,7 +3,7 @@
 > **A case-file-style Digital Public Safety prototype that turns suspicious calls into evidence-backed scam verdicts.**
 
 [![ET AI Hackathon 2.0](https://img.shields.io/badge/ET%20AI%20Hackathon-2.0-blueviolet)](https://github.com/ridhi-png/prahari)
-[![Prototype](https://img.shields.io/badge/Status-Prototype-orange)](https://github.com/ridhi-png/prahari)
+[![Prototype](https://img.shields.io/badge/Status-Prototype-orange)](https://roaring-beignet-f66e3d.netlify.app/)
 [![Offline Ready](https://img.shields.io/badge/Works-Offline-success)](https://github.com/ridhi-png/prahari)
 
 ## The Problem
@@ -64,7 +64,7 @@ No setup required.
 1. Clone or download this repository.
 2. Open `index.html` directly in your browser.
 
-Or use the live demo: **https://ridhi-png.github.io/prahari/**
+Or use the live demo: **https://roaring-beignet-f66e3d.netlify.app/**
 
 ## Judging-Criteria Mapping
 
